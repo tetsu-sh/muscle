@@ -1,0 +1,22 @@
+<mxfile host="65bd71144e">
+    <diagram id="LRws0rHeKM2_gnhdb8zd" name="ページ1">
+        <mxGraphModel dx="576" dy="594" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="280" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="トレーニングを作成する" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="270" width="110" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="筋肉を作成する" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="270" width="110" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="トレーニングを作成する" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="370" width="110" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
