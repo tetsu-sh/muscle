@@ -1,20 +1,17 @@
 mod usecase;
 mod domain;
+mod repository;
+mod presentation;
+mod utils;
 
 
-use actix_web::{get,middleware,HttpRequest, web, App, HttpServer,Responder};
-use usecase::train::TrainUsecase;
+use actix_web::{get,post,middleware,HttpResponse, web, App, HttpServer,Responder};
+use actix_web::web::{get, post};
+use presentation::train::create;
+use utils::errors::MyError;
+use crate::presentation::train::CreateTrainRequest;
 
 
-#[get("/hello/{name}")]
-async fn greet(name: web::Path<String>) -> impl Responder {
-    format!("Hello {name}!")
-}
-
-#[post("/train/{name}")]
-async fn create_train(name:web::Path<String>){
-    TrainUsecase:create_train(name);
-}
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -22,12 +19,20 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .wrap(middleware::Logger::default().log_target("http_log"))
-            .route("/hello", web::get().to(|| async { "Hello World!" }))
-            .service(greet)
+            .wrap(middleware::Logger::default())
+            .configure(api)
     })
     .bind(("127.0.0.1", 8080))?
     .workers(1)
     .run()
     .await
+}
+
+
+pub fn api(cfg: &mut web::ServiceConfig){
+    cfg.service(
+        web::scope("/api")
+            .service(web::scope("/train").route("", post().to(presentation::train::create)))
+            .service(web::scope("/healthcheck").route("", get().to(presentation::healthcheck::index))),
+    );
 }

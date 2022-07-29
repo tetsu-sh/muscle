@@ -1,10 +1,23 @@
 
+#[derive(Debug,Clone)]
 pub struct Muscle{
     name:MuscleName,
     position:BodyPosition,
     size:MuscleSize
 }
 
+impl Muscle {
+    fn new(name:MuscleName,position:BodyPosition,size:MuscleSize)->Self{
+        Self{
+            name,
+            position,
+            size,
+        }
+
+    }
+}
+
+#[derive(Debug,Clone)]
 enum BodyPosition{
     Arm,
     Back,
@@ -13,11 +26,13 @@ enum BodyPosition{
     Tolso,
 }
 
+#[derive(Debug,Clone)]
 struct MuscleName(String);
 
 
+#[derive(Debug,Clone)]
 enum MuscleSize{
-    large,
-    middle,
-    small,
+    Large,
+    Middle,
+    Small,
 }
