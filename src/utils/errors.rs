@@ -11,6 +11,9 @@ pub enum MyError{
     InternalServerError,
     #[error("Not Found")]
     NotFound(JsonValue),
+    #[error("Bad Request")]
+    BadRequest(JsonValue),
+
 }
 
 
@@ -19,7 +22,8 @@ impl ResponseError for MyError{
     fn error_response(&self) -> HttpResponse{
         match self{
             MyError::InternalServerError=>HttpResponse::InternalServerError().json("Internal Server Error"),
-            MyError::NotFound(ref msg)=>HttpResponse::NotFound().json(msg)
+            MyError::NotFound(ref msg)=>HttpResponse::NotFound().json(msg),
+            MyError::BadRequest(ref msg)=>HttpResponse::BadRequest().json(msg)
         }
     }
 
@@ -27,6 +31,7 @@ impl ResponseError for MyError{
         match *self {
            MyError::InternalServerError=>StatusCode::INTERNAL_SERVER_ERROR, 
            MyError::NotFound(_)=>StatusCode::NOT_FOUND, 
+           MyError::BadRequest(_)=>StatusCode::BAD_REQUEST, 
         }
     }
 }

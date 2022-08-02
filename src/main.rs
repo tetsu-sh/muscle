@@ -5,19 +5,15 @@ mod presentation;
 mod utils;
 
 
-use actix_web::{get,post,middleware,HttpResponse, web, App, HttpServer,Responder};
+use actix_web::{middleware, web, App, HttpServer};
 use actix_web::web::{get, post};
-use actix_web::middleware::Logger;
-use presentation::train::create;
-use utils::errors::MyError;
-use crate::presentation::train::CreateTrainRequest;
 
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // std::env::set_var("RUST_LOG", "actix_web=info");
     // env_logger::init();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
     HttpServer::new(|| {
         App::new()

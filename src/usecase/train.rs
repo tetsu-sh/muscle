@@ -1,7 +1,9 @@
 
 
 
-use crate::domain::train::{Train, TrainRepository};
+use log::info;
+
+use crate::{domain::train::{Train, TrainRepository}, utils::errors::MyError};
 
 
 pub struct TrainUsecase<T:TrainRepository>{
@@ -13,12 +15,11 @@ impl <T:TrainRepository>TrainUsecase<T>{
         Self{train_repository}
     }
 
-    pub fn create_train(&self,trainname:String,volume:i32,set:i32,rep:i32)->Train{
+    pub fn create_train(&self,name:String,volume:i32,set:i32,rep:i32)->Result<Train,MyError>{
 
-        let train=Train::new(trainname,volume,set,rep);
-        println!("{:?}",train);
+        let train=Train::new(name,volume,set,rep)?;
         self.train_repository.create();
-        train
+        Ok(train)
     }
 
     fn train(_:Self,trains:Vec<Train>)->Train{
