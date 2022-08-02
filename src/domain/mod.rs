@@ -1,2 +1,2 @@
-pub mod train;
 pub mod muscle;
+pub mod train;

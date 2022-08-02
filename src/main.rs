@@ -1,13 +1,11 @@
-mod usecase;
 mod domain;
-mod repository;
 mod presentation;
+mod repository;
+mod usecase;
 mod utils;
 
-
-use actix_web::{middleware, web, App, HttpServer};
 use actix_web::web::{get, post};
-
+use actix_web::{middleware, web, App, HttpServer};
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -26,11 +24,12 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-
-pub fn api(cfg: &mut web::ServiceConfig){
+pub fn api(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
             .service(web::scope("/train").route("", post().to(presentation::train::create)))
-            .service(web::scope("/healthcheck").route("", get().to(presentation::healthcheck::index))),
+            .service(
+                web::scope("/healthcheck").route("", get().to(presentation::healthcheck::index)),
+            ),
     );
 }
