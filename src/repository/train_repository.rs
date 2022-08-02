@@ -1,12 +1,17 @@
-struct TrainRepositoryImpl{
+use crate::domain::train::{Train,TrainRepository};
 
+pub struct TrainRepositoryImpl{
 }
 
 
 
-impl TrainRepositoryImpl for TrainRepository{
-    fn create(){
-        
+impl TrainRepository for TrainRepositoryImpl {
+    fn create(&self){
+       todo!() 
+    }
+
+    fn find_by_name(&self)->Train{
+        todo!()
     }
 
 }
