@@ -7,7 +7,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Train {
     pub name: String,
-    pub id: String,
+    pub id: i32,
     pub volume: i32,
     pub rep: i32,
     pub set: i32,
@@ -69,7 +69,8 @@ impl TrainTemplate {
 
 pub trait TrainRepository {
     fn create(&self);
-    fn find_by_name(&self) -> Train;
+    fn fetch_one(&self,id:i32)->Result<(),MyError>;
+    fn find_by_name(&self);
 }
 
 #[cfg(test)]

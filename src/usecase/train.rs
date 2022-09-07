@@ -29,4 +29,8 @@ impl<T: TrainRepository> TrainUsecase<T> {
     fn train(_: Self, trains: Vec<Train>) -> Train {
         todo!()
     }
+
+    fn fetch_one(&self,id:i32)->Train{
+        self.train_repository.fetch_one()
+    }
 }

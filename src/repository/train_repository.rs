@@ -1,13 +1,25 @@
-use crate::domain::train::{Train, TrainRepository};
+use diesel::MysqlConnection;
 
-pub struct TrainRepositoryImpl {}
+use crate::{domain::train::{ TrainRepository, Train}, utils::errors::MyError};
 
-impl TrainRepository for TrainRepositoryImpl {
+use super::model::{TrainRdbModel};
+
+
+pub struct TrainRepositoryImpl<'a> {
+    conn:&'a MysqlConnection
+}
+
+impl TrainRepository for TrainRepositoryImpl<'_> {
     fn create(&self) {
         todo!()
     }
 
-    fn find_by_name(&self) -> Train {
+    fn fetch_one(&self,id:i32)->Result<Train,MyError>{
+        let train=TrainRdbModel::fetch(&self.conn,id)?;
+        Ok(train)
+    }
+
+    fn find_by_name(&self){
         todo!()
     }
 }

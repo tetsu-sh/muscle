@@ -1,8 +1,13 @@
+#[macro_use]
+extern crate diesel;
+
 mod domain;
 mod presentation;
 mod repository;
 mod usecase;
 mod utils;
+mod constants;
+mod schema;
 
 use actix_web::web::{get, post,Data};
 use actix_web::{middleware, web,guard,App, HttpServer,HttpResponse,Result};
@@ -48,12 +53,14 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
     
+    let pool=utils::db::establish_connection();
 
     HttpServer::new(move|| {
         App::new()
             .wrap(middleware::Logger::default())
             .configure(api)
             .app_data(Data::new(schema.clone()))
+            .app_data(Data::new(pool.clone()))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
             .service(web::resource("/").guard(guard::Post()).to(index))
     })
