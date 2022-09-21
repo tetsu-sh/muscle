@@ -1,6 +1,6 @@
 table! {
     trains (id) {
-        id -> Integer,
+        id -> Varchar,
         name -> Varchar,
         volume -> Integer,
         rep -> Integer,

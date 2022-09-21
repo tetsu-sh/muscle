@@ -1,6 +1,6 @@
 -- Your SQL goes here
 CREATE TABLE trains (
-    id INTEGER PRIMARY KEY,
+    id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     volume INTEGER NOT NULL, 
     rep INTEGER NOT NULL, 

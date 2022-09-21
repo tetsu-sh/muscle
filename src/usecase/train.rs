@@ -30,7 +30,7 @@ impl<T: TrainRepository> TrainUsecase<T> {
         todo!()
     }
 
-    fn fetch_one(&self,id:i32)->Train{
-        self.train_repository.fetch_one()
+    pub fn fetch_one(&self, id: &String) -> Result<Train, MyError> {
+        self.train_repository.fetch_one(id)
     }
 }

@@ -2,12 +2,13 @@ use super::muscle::Muscle;
 use crate::utils::errors::MyError;
 use log::info;
 use serde_json::json;
+use ulid::Ulid;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Train {
     pub name: String,
-    pub id: i32,
+    pub id: String,
     pub volume: i32,
     pub rep: i32,
     pub set: i32,
@@ -39,7 +40,7 @@ impl Train {
                 json!({"error":"train name must be less than 30 letters"}),
             ));
         }
-        let id = Uuid::new_v4().to_string();
+        let id = Ulid::new().to_string();
         Ok(Self {
             name,
             id,
@@ -69,7 +70,7 @@ impl TrainTemplate {
 
 pub trait TrainRepository {
     fn create(&self);
-    fn fetch_one(&self,id:i32)->Result<(),MyError>;
+    fn fetch_one(&self, id: &String) -> Result<Train, MyError>;
     fn find_by_name(&self);
 }
 
@@ -92,11 +93,14 @@ mod tests {
 
     #[test]
     fn test_train_new_failed() {
-        let test_name = "x".to_string().repeat((NAME_LIMIT+1) as usize);
+        let test_name = "x".to_string().repeat((NAME_LIMIT + 1) as usize);
         let test_vol = 100;
         let test_rep = 10;
         let test_set = 10;
         let train = Train::new(test_name.clone(), test_vol, test_rep, test_set).unwrap_err();
-        assert_eq!(train,MyError::BadRequest(json!({"error":"train name must be less than 30 letters"})));
+        assert_eq!(
+            train,
+            MyError::BadRequest(json!({"error":"train name must be less than 30 letters"}))
+        );
     }
 }
