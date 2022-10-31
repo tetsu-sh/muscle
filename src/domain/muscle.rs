@@ -1,12 +1,12 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Muscle {
-    name: MuscleName,
+    name: String,
     position: BodyPosition,
     size: MuscleSize,
 }
 
 impl Muscle {
-    fn new(name: MuscleName, position: BodyPosition, size: MuscleSize) -> Self {
+    pub fn new(name: String, position: BodyPosition, size: MuscleSize) -> Self {
         Self {
             name,
             position,
@@ -15,8 +15,8 @@ impl Muscle {
     }
 }
 
-#[derive(Debug, Clone)]
-enum BodyPosition {
+#[derive(Debug, Clone, PartialEq)]
+pub enum BodyPosition {
     Arm,
     Back,
     Leg,
@@ -24,11 +24,8 @@ enum BodyPosition {
     Tolso,
 }
 
-#[derive(Debug, Clone)]
-struct MuscleName(String);
-
-#[derive(Debug, Clone)]
-enum MuscleSize {
+#[derive(Debug, Clone, PartialEq)]
+pub enum MuscleSize {
     Large,
     Middle,
     Small,

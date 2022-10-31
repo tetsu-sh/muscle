@@ -11,7 +11,7 @@ use log::info;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
-#[derive(Deserialize, Serialize,Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct CreateTrainRequest {
     name: String,
     volume: i32,
@@ -30,7 +30,7 @@ impl From<Train> for CreateTrainResponse {
     }
 }
 
-#[derive(Deserialize, Serialize,Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct FetchTrainParameter {
     id: String,
 }
@@ -64,8 +64,8 @@ pub async fn create(
     form: web::Json<CreateTrainRequest>,
 ) -> ApiResponse {
     info!("start create");
-    println!("{:?}",form);
-    println!("{:?}",req);
+    println!("{:?}", form);
+    println!("{:?}", req);
     let conn = state.get_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let train_usecase = TrainUsecase { train_repository };
@@ -79,8 +79,8 @@ pub async fn fetch(
     req: HttpRequest,
     params: web::Query<FetchTrainParameter>,
 ) -> ApiResponse {
-    println!("{:?}",params);
-    println!("{:?}",req);
+    println!("{:?}", params);
+    println!("{:?}", req);
     let conn = state.get_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let train_usecase = TrainUsecase { train_repository };

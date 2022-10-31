@@ -3,7 +3,6 @@ use crate::utils::errors::MyError;
 use diesel::mysql::MysqlConnection;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 
-
 type AppConn = PooledConnection<ConnectionManager<MysqlConnection>>;
 
 #[derive(Clone)]

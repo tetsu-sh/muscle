@@ -12,13 +12,14 @@ pub struct TrainRepositoryImpl<'a> {
 }
 
 impl TrainRepository for TrainRepositoryImpl<'_> {
-    fn create(&self) {
-        todo!()
+    fn create(&self, train: Train) {
+        train_rdb_model = TrainRdbModel::from(train);
+        TrainRdbModel::save(self, &self.conn, train)
     }
 
     fn fetch_one(&self, id: &String) -> Result<Train, MyError> {
         let train = TrainRdbModel::fetch(&self.conn, &id)?;
-        println!("{:?}",train);
+        println!("{:?}", train);
         Ok(train)
     }
 

@@ -22,7 +22,7 @@ impl<T: TrainRepository> TrainUsecase<T> {
         rep: i32,
     ) -> Result<Train, MyError> {
         let train = Train::new(name, volume, set, rep)?;
-        self.train_repository.create();
+        self.train_repository.create(train);
         Ok(train)
     }
 

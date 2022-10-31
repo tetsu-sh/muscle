@@ -74,8 +74,8 @@ pub fn api(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .service(
                 web::scope("/train")
-                .service(web::scope("").route("", get().to(presentation::train::fetch)))
-                .service(web::scope("").route("", post().to(presentation::train::create)))
+                    .route("", get().to(presentation::train::fetch))
+                    .route("", post().to(presentation::train::create)),
             )
             .service(
                 web::scope("/healthcheck").route("", get().to(presentation::healthcheck::index)),
