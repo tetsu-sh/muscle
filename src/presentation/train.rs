@@ -1,6 +1,7 @@
 use actix_web::{web, HttpRequest, Responder};
 
 use crate::repository::model;
+use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::repository::train_repository::TrainRepositoryImpl;
 use crate::usecase::train::TrainUsecase;
 use crate::utils::errors::MyError;
@@ -68,7 +69,11 @@ pub async fn create(
     println!("{:?}", req);
     let conn = state.get_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
-    let train_usecase = TrainUsecase { train_repository };
+    let muscle_repository = MuscleRepositoryImpl { conn: &conn };
+    let train_usecase = TrainUsecase {
+        train_repository,
+        muscle_repository,
+    };
     let train = train_usecase.create_train(form.name.clone(), form.volume, form.rep, form.set)?;
     let create_train_response = CreateTrainResponse::from(train);
     Ok(HttpResponse::Ok().json(create_train_response))

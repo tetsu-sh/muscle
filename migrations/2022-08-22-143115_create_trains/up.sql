@@ -59,7 +59,7 @@ CREATE TABLE body_profile(
     weight INTEGER DEFAULT 0,
     height INTEGER DEFAULT 0,
     FOREIGN KEY (account_id) REFERENCES accounts(id)
-    );
+);
 
 CREATE TABLE trainees(
     id VARCHAR(100) PRIMARY KEY,

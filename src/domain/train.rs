@@ -3,16 +3,16 @@ use crate::utils::errors::MyError;
 use serde_json::json;
 use ulid::Ulid;
 
-// トレーニングの内容や強度を表現する
+// represent training detail and strength.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Train {
     pub name: String,
     pub id: String,
-    // 重量
+    // means weight
     pub volume: i32,
-    // 実施した回数
+    // times
     pub rep: i32,
-    // 使用される筋肉部位
+    // muscles using for this training.
     pub muscles: Vec<Muscle>,
 }
 const NAME_LIMIT: i32 = 30;
@@ -32,11 +32,6 @@ impl Train {
                 json!({"error":"rep must be less than 1000.you are possibly not human."}),
             ));
         };
-        if set > SET_LIMIT {
-            return Err(MyError::BadRequest(
-                json!({"error":"set must be less than 1000.you are possibly not human."}),
-            ));
-        };
         if name.chars().count() as i32 > NAME_LIMIT {
             return Err(MyError::BadRequest(
                 json!({"error":"train name must be less than 30 letters"}),
@@ -54,7 +49,7 @@ impl Train {
 }
 
 pub trait TrainRepository {
-    fn create(&self, train: Train);
+    fn create(&self, train: Train, muscle_ids: Vec<String>) -> Result<(), MyError>;
     fn fetch_one(&self, id: &String) -> Result<Train, MyError>;
     fn find_by_name(&self);
 }

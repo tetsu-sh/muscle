@@ -20,3 +20,4 @@ async-graphql = "4.0"
 async-graphql-actix-web = "4.0" # If you need to integrate into actix-web
 r2d2 = "0.8.10"
 ulid = "1.0.0"
+strum = { version = "0.24", features = ["derive"] }
