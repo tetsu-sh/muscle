@@ -52,7 +52,7 @@ pub trait MuscleRepository {
 
 #[async_trait]
 pub trait BodyPartRepository {
-    async fn save(&self, id: String, body_position: BodyPosition) -> Result<(), MyError>;
+    async fn save(&self, id: &String, body_position: BodyPosition) -> Result<(), MyError>;
     async fn fetch_one(&self, id: &String) -> Result<BodyPosition, MyError>;
     async fn find_by_name(&self, name: &String) -> Result<Option<BodyPosition>, MyError>;
 }

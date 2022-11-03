@@ -37,7 +37,7 @@ impl<M: MuscleRepository, P: BodyPartRepository> MuscleUsecase<M, P> {
         Ok(muscle.unwrap())
     }
 
-    pub async fn create_body_part(&self, name: String) -> Result<BodyPosition, MyError> {
+    pub async fn create_body_part(&self, name: String) -> Result<(BodyPosition, String), MyError> {
         let body_part_record = self.body_part_repository.find_by_name(&name).await?;
         println!("{:?}", body_part_record);
         if body_part_record.is_some() {
@@ -45,10 +45,12 @@ impl<M: MuscleRepository, P: BodyPartRepository> MuscleUsecase<M, P> {
                 "error":"same name are not forbidden."
             })));
         };
+
+        // want: reorganize it to domain layer.
         let id = ulid::Ulid::new().to_string();
 
         self.body_part_repository
-            .save(id, BodyPosition::from_str(&name)?);
-        Ok(BodyPosition::from_str(&name)?)
+            .save(&id, BodyPosition::from_str(&name)?);
+        Ok((BodyPosition::from_str(&name)?, id))
     }
 }

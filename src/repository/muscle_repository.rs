@@ -87,7 +87,7 @@ pub struct BodyPartRepositoryImpl<'a> {
 
 #[async_trait]
 impl BodyPartRepository for BodyPartRepositoryImpl<'_> {
-    async fn save(&self, id: String, body_part: BodyPosition) -> Result<(), MyError> {
+    async fn save(&self, id: &String, body_part: BodyPosition) -> Result<(), MyError> {
         println!("bodypart create");
         let mut tx = self.conn.begin().await?;
         sqlx::query!(

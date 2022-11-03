@@ -61,12 +61,14 @@ pub struct CreateBodyPartParameter {
 
 #[derive(Deserialize, Serialize)]
 pub struct CreateBodyPartResponse {
+    id: String,
     body_position: String,
 }
 
 impl CreateBodyPartResponse {
-    fn from(body_position: BodyPosition) -> Self {
+    fn from(id: String, body_position: BodyPosition) -> Self {
         Self {
+            id,
             body_position: body_position.to_string(),
         }
     }
@@ -133,7 +135,7 @@ pub async fn create_body_part(
         muscle_repository,
         body_part_repository,
     };
-    let body_part = muscle_usecase.create_body_part(params.name.clone()).await?;
-    let create_body_part_response = CreateBodyPartResponse::from(body_part);
+    let (body_part, id) = muscle_usecase.create_body_part(params.name.clone()).await?;
+    let create_body_part_response = CreateBodyPartResponse::from(id, body_part);
     Ok(HttpResponse::Ok().json(create_body_part_response))
 }
