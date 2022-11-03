@@ -79,6 +79,15 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                     .route("", post().to(presentation::train::create)),
             )
             .service(
+                web::scope("/muscle")
+                    .route("", get().to(presentation::muscle::fetch_muscle))
+                    .route("", post().to(presentation::muscle::create_muscle))
+                    .service(
+                        web::scope("/body_part")
+                            .route("", post().to(presentation::muscle::create_body_part)),
+                    ),
+            )
+            .service(
                 web::scope("/healthcheck").route("", get().to(presentation::healthcheck::index)),
             ),
     );

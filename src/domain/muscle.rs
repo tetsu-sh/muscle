@@ -44,10 +44,17 @@ impl Muscle {
 
 #[async_trait]
 pub trait MuscleRepository {
-    fn create(&self, muscle: Muscle, body_part_id: String) -> Result<(), MyError>;
+    async fn create(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError>;
     async fn fetch_one(&self, id: &String) -> Result<Muscle, MyError>;
     async fn fetch_by_train_id(&self, train_id: &String) -> Result<Vec<Muscle>, MyError>;
-    fn find_by_name(&self);
+    fn find_by_name(&self, name: &String);
+}
+
+#[async_trait]
+pub trait BodyPartRepository {
+    async fn save(&self, id: String, body_position: BodyPosition) -> Result<(), MyError>;
+    async fn fetch_one(&self, id: &String) -> Result<BodyPosition, MyError>;
+    async fn find_by_name(&self, name: &String) -> Result<Option<BodyPosition>, MyError>;
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, EnumString, Display)]

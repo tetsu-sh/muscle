@@ -1,5 +1,10 @@
+use std::str::FromStr;
+
 use crate::{
-    domain::{muscle::Muscle, muscle::MuscleRepository},
+    domain::{
+        muscle::Muscle,
+        muscle::{BodyPartRepository, BodyPosition, MuscleRepository},
+    },
     utils::errors::MyError,
 };
 use async_trait::async_trait;
@@ -20,8 +25,19 @@ struct MusclesQueryModel {
 
 #[async_trait]
 impl MuscleRepository for MuscleRepositoryImpl<'_> {
-    fn create(&self, muscle: Muscle, body_part_id: String) -> Result<(), MyError> {
-        todo!()
+    async fn create(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError> {
+        sqlx::query!(
+            "insert into muscles
+            values(?,?,?,?)
+            ",
+            muscle.id,
+            muscle.name,
+            body_part_id,
+            muscle.size.to_string()
+        )
+        .execute(self.conn)
+        .await?;
+        Ok(())
     }
 
     async fn fetch_one(&self, id: &String) -> Result<Muscle, MyError> {
@@ -53,8 +69,61 @@ impl MuscleRepository for MuscleRepositoryImpl<'_> {
         Ok(muscles_iter.map(Result::unwrap).collect())
     }
 
-    fn find_by_name(&self) {
+    fn find_by_name(&self, name: &String) {
         todo!()
+    }
+}
+
+pub struct BodyPartRepositoryImpl<'a> {
+    pub conn: &'a MySqlPool,
+}
+
+#[async_trait]
+impl BodyPartRepository for BodyPartRepositoryImpl<'_> {
+    async fn save(&self, id: String, body_part: BodyPosition) -> Result<(), MyError> {
+        println!("bodypart create");
+        sqlx::query!(
+            "insert into body_parts
+            values(?,?)
+            ",
+            id,
+            body_part.to_string()
+        )
+        .execute(self.conn)
+        .await?;
+        Ok(())
+    }
+
+    async fn fetch_one(&self, id: &String) -> Result<BodyPosition, MyError> {
+        let record = sqlx::query!(
+            "select id,name
+            from body_parts 
+            where body_parts.id=? 
+            ",
+            id
+        )
+        .fetch_one(self.conn)
+        .await?;
+        let body_position = BodyPosition::from_str(&record.name)?;
+        Ok(body_position)
+    }
+
+    async fn find_by_name(&self, name: &String) -> Result<Option<BodyPosition>, MyError> {
+        let record = sqlx::query!(
+            "select id,name
+            from body_parts 
+            where body_parts.name=? 
+            ",
+            name
+        )
+        .fetch_optional(self.conn)
+        .await?;
+        if let Some(record) = record {
+            let body_position = BodyPosition::from_str(&record.name)?;
+            Ok(Some(body_position))
+        } else {
+            Ok(None)
+        }
     }
 }
 

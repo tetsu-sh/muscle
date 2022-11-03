@@ -18,7 +18,6 @@ pub struct Train {
 }
 const NAME_LIMIT: i32 = 30;
 const REP_LIMIT: i32 = 1000;
-const SET_LIMIT: i32 = 1000;
 const VOLUME_LIMIT: i32 = 1000;
 
 impl Train {
