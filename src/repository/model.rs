@@ -25,38 +25,6 @@ pub struct TrainRdbModel {
     pub rep: i32,
 }
 
-pub struct FetchTrainRdbQueryModel {
-    pub id: String,
-    pub train_name: String,
-    pub volume: i32,
-    pub rep: i32,
-    pub muscle_name: String,
-    pub size: String,
-    pub body_part_name: String,
-}
-
-impl FetchTrainRdbQueryModel {
-    pub fn new(
-        id: String,
-        train_name: String,
-        volume: i32,
-        rep: i32,
-        muscle_name: String,
-        size: String,
-        body_part_name: String,
-    ) -> FetchTrainRdbQueryModel {
-        FetchTrainRdbQueryModel {
-            id,
-            train_name,
-            volume,
-            rep,
-            muscle_name,
-            size,
-            body_part_name,
-        }
-    }
-}
-
 impl TrainRdbModel {
     pub fn from(train: Train) -> TrainRdbModel {
         TrainRdbModel {

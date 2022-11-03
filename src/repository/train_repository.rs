@@ -1,37 +1,123 @@
-use diesel::connection::{AnsiTransactionManager, TransactionManager};
-use diesel::{Connection, MysqlConnection};
+use std::str::FromStr;
 
 use crate::{
     domain::{
-        muscle::Muscle,
+        muscle::{BodyPosition, Muscle, MuscleSize},
         train::{Train, TrainRepository},
     },
     utils::errors::MyError,
 };
-
-use super::model::{TrainMuscleRdbModel, TrainRdbModel};
+use async_trait::async_trait;
+use sqlx::MySqlPool;
 
 pub struct TrainRepositoryImpl<'a> {
-    pub conn: &'a MysqlConnection,
+    pub conn: &'a MySqlPool,
 }
 
-impl TrainRepository for TrainRepositoryImpl<'_> {
-    fn create(&self, train: Train, muscle_ids: Vec<String>) -> Result<(), MyError> {
-        // store train model and connect train and muscles.
-        // TODO transaction
-        let tm = AnsiTransactionManager::new();
-        let train_rdb_model = TrainRdbModel::from(train);
-        train_rdb_model.save(&self.conn, train);
-        for muscle_id in muscle_ids.iter() {
-            let train_muscle_rdb_model = TrainMuscleRdbModel::new(*muscle_id, train.id);
-            train_muscle_rdb_model.save_one(self.conn, train.id, *muscle_id);
+#[derive(sqlx::FromRow, Clone, Debug)]
+pub struct FetchTrainRdbQueryModel {
+    pub id: String,
+    pub train_name: String,
+    pub volume: i32,
+    pub rep: i32,
+    pub muscle_name: String,
+    pub size: String,
+    pub body_part_name: String,
+}
+
+impl FetchTrainRdbQueryModel {
+    pub fn new(
+        id: String,
+        train_name: String,
+        volume: i32,
+        rep: i32,
+        muscle_name: String,
+        size: String,
+        body_part_name: String,
+    ) -> FetchTrainRdbQueryModel {
+        FetchTrainRdbQueryModel {
+            id,
+            train_name,
+            volume,
+            rep,
+            muscle_name,
+            size,
+            body_part_name,
         }
+    }
+
+    fn to_domain(items: Vec<FetchTrainRdbQueryModel>) -> Result<Train, MyError> {
+        let mut muscles = vec![];
+        for item in items.iter() {
+            muscles.push(Muscle::from(
+                item.id.clone(),
+                item.muscle_name.clone(),
+                item.body_part_name.clone(),
+                item.size.clone(),
+            )?)
+        }
+        let initial_item = items[0].clone();
+        let train = Train::new(
+            initial_item.train_name,
+            initial_item.volume,
+            initial_item.rep,
+            muscles,
+        );
+        train
+    }
+}
+
+#[async_trait]
+impl TrainRepository for TrainRepositoryImpl<'_> {
+    async fn create(&self, train: &Train) -> Result<(), MyError> {
+        // store train model and connect train and muscles.
+        // TODO transaction,bulk insert.
+        for muscle in train.muscles.iter() {
+            sqlx::query!("insert into train_muscle values(?,?)", train.id, muscle.id)
+                .execute(self.conn)
+                .await?;
+        }
+        sqlx::query!(
+            "insert into trains values(?,?,?,?,?)",
+            train.id,
+            "test_account_id",
+            train.name,
+            train.volume,
+            train.rep
+        )
+        .execute(self.conn)
+        .await?;
+
         Ok(())
     }
 
-    fn fetch_one(&self, id: &String) -> Result<Train, MyError> {
-        let train = TrainRdbModel::fetch_with_muscle(&self.conn, &id)?;
-        Ok(train)
+    async fn fetch_one(&self, id: &String) -> Result<Train, MyError> {
+        // let query_trains = sqlx::query_as::<_, FetchTrainRdbQueryModel>(
+        //     "select * from trains as t
+        //     join train_muscle as tm on trains.id=trains_muscles.train_id
+        //     join muscles as m on tm.muscle_id=m.id
+        //     join body_parts as bp on m.body_part_id=bp.id
+        //     where t.id=?",
+        // )
+        // .bind(id)
+        // .fetch_all(self.conn)
+        // .await?;
+        let query_trains = sqlx::query!(
+            "select t.id,t.name,t.volume,t.rep,m.id as train_id,m.name as muscle_name,m.size,bp.name as body_part_name
+            from trains as t 
+            join train_muscle as tm on t.id=tm.train_id
+            join muscles as m on tm.muscle_id=m.id 
+            join body_parts as bp on m.body_part_id=bp.id 
+            where t.id=?",
+            id
+        )
+        .fetch_all(self.conn)
+        .await?
+        .iter()
+        .map(|x|FetchTrainRdbQueryModel::new(x.id.clone(), x.name.clone(), x.volume, x.rep, x.muscle_name.clone(), x.size.clone(), x.body_part_name.clone())).collect::<Vec<FetchTrainRdbQueryModel>>();
+
+        let train = FetchTrainRdbQueryModel::to_domain(query_trains);
+        train
     }
 
     fn find_by_name(&self) {

@@ -1,5 +1,6 @@
 use super::muscle::Muscle;
 use crate::utils::errors::MyError;
+use async_trait::async_trait;
 use serde_json::json;
 use ulid::Ulid;
 
@@ -47,10 +48,10 @@ impl Train {
         })
     }
 }
-
+#[async_trait]
 pub trait TrainRepository {
-    fn create(&self, train: Train, muscle_ids: Vec<String>) -> Result<(), MyError>;
-    fn fetch_one(&self, id: &String) -> Result<Train, MyError>;
+    async fn create(&self, train: &Train) -> Result<(), MyError>;
+    async fn fetch_one(&self, id: &String) -> Result<Train, MyError>;
     fn find_by_name(&self);
 }
 
@@ -84,8 +85,7 @@ mod tests {
             crate::domain::muscle::BodyPosition::Tolso,
             crate::domain::muscle::MuscleSize::Middle,
         );
-        let train =
-            Train::new(test_name.clone(), test_vol, test_rep, vec![test_muscle]).unwrap_err();
+        let train = Train::new(test_name, test_vol, test_rep, vec![test_muscle]).unwrap_err();
         assert_eq!(
             train,
             MyError::BadRequest(json!({"error":"train name must be less than 30 letters"}))

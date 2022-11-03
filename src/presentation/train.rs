@@ -1,12 +1,12 @@
-use actix_web::{web, HttpRequest, Responder};
+use actix_web::{web, HttpRequest};
 
-use crate::repository::model;
+use crate::domain::muscle::Muscle;
+use crate::domain::train::Train;
 use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::repository::train_repository::TrainRepositoryImpl;
 use crate::usecase::train::TrainUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
-use crate::{domain::train::Train, utils::db::DbPool};
 use actix_web::HttpResponse;
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -18,6 +18,7 @@ pub struct CreateTrainRequest {
     volume: i32,
     rep: i32,
     set: i32,
+    muscle_ids: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -42,7 +43,7 @@ pub struct FetchTrainResponse {
     name: String,
     volume: i32,
     rep: i32,
-    set: i32,
+    muscles: Vec<Muscle>,
 }
 
 impl FetchTrainResponse {
@@ -52,7 +53,7 @@ impl FetchTrainResponse {
             name: train.name,
             volume: train.volume,
             rep: train.rep,
-            set: train.set,
+            muscles: train.muscles,
         }
     }
 }
@@ -67,14 +68,21 @@ pub async fn create(
     info!("start create");
     println!("{:?}", form);
     println!("{:?}", req);
-    let conn = state.get_conn()?;
+    let conn = state.get_sqls_db_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
     let train_usecase = TrainUsecase {
         train_repository,
         muscle_repository,
     };
-    let train = train_usecase.create_train(form.name.clone(), form.volume, form.rep, form.set)?;
+    let train = train_usecase
+        .create_train(
+            form.name.clone(),
+            form.volume,
+            form.rep,
+            form.muscle_ids.clone(),
+        )
+        .await?;
     let create_train_response = CreateTrainResponse::from(train);
     Ok(HttpResponse::Ok().json(create_train_response))
 }
@@ -86,10 +94,14 @@ pub async fn fetch(
 ) -> ApiResponse {
     println!("{:?}", params);
     println!("{:?}", req);
-    let conn = state.get_conn()?;
+    let conn = state.get_sqls_db_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
-    let train_usecase = TrainUsecase { train_repository };
-    let train = train_usecase.fetch_one(&params.id)?;
+    let muscle_repository = MuscleRepositoryImpl { conn: &conn };
+    let train_usecase = TrainUsecase {
+        train_repository,
+        muscle_repository,
+    };
+    let train = train_usecase.fetch_one(&params.id).await?;
     let res = FetchTrainResponse::from(train);
 
     Ok(HttpResponse::Ok().json(res))

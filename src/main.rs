@@ -50,16 +50,17 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
-    let pool = utils::db::establish_connection();
-
-    let state = crate::utils::state::AppState { pool };
+    // let pool = utils::db::establish_connection();
+    let pool = utils::db::establish_sqlx_connection().await;
+    let app_state = utils::state::AppState { sqlx_db: pool };
+    // let state = crate::utils::state::AppState { pool };
 
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
             .configure(api)
             .app_data(Data::new(schema.clone()))
-            .app_data(Data::new(state.clone()))
+            .app_data(Data::new(app_state.clone()))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
             .service(web::resource("/").guard(guard::Post()).to(index))
     })

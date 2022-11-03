@@ -4,6 +4,8 @@ use diesel::result::{DatabaseErrorKind, Error as DieselError};
 use r2d2::Error as R2D2Error;
 use serde_json::json;
 use serde_json::Value as JsonValue;
+use sqlx::Error as SqlxError;
+use strum::ParseError as StrumParseError;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
@@ -67,6 +69,19 @@ impl From<DieselError> for MyError {
             DieselError::NotFound => MyError::NotFound(json!({"error":"request record not found"})),
             _ => MyError::InternalServerError,
         }
+    }
+}
+
+impl From<SqlxError> for MyError {
+    fn from(err: SqlxError) -> Self {
+        println!("error:{}", err);
+        MyError::InternalServerError
+    }
+}
+
+impl From<StrumParseError> for MyError {
+    fn from(err: StrumParseError) -> Self {
+        MyError::BadRequest(json!({ "error": err.to_string() }))
     }
 }
 
