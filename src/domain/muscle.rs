@@ -45,7 +45,7 @@ impl Muscle {
 #[async_trait]
 pub trait MuscleRepository {
     async fn create(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError>;
-    async fn fetch_one(&self, id: &String) -> Result<Muscle, MyError>;
+    async fn fetch_one(&self, id: &String) -> Result<Option<Muscle>, MyError>;
     async fn fetch_by_train_id(&self, train_id: &String) -> Result<Vec<Muscle>, MyError>;
     fn find_by_name(&self, name: &String);
 }

@@ -1,3 +1,4 @@
+use serde_json::json;
 use std::str::FromStr;
 
 use crate::{
@@ -40,7 +41,7 @@ impl MuscleRepository for MuscleRepositoryImpl<'_> {
         Ok(())
     }
 
-    async fn fetch_one(&self, id: &String) -> Result<Muscle, MyError> {
+    async fn fetch_one(&self, id: &String) -> Result<Option<Muscle>, MyError> {
         let record = sqlx::query!(
             "select muscles.id,muscles.name,muscles.size,body_parts.name as position
             from muscles join body_parts on muscles.body_part_id=body_parts.id 
@@ -48,10 +49,16 @@ impl MuscleRepository for MuscleRepositoryImpl<'_> {
             ",
             id
         )
-        .fetch_one(self.conn)
+        .fetch_optional(self.conn)
         .await?;
-        let muscle = Muscle::from(record.id, record.name, record.position, record.size)?;
-        Ok(muscle)
+        if let Some(record) = record {
+            let muscle = Muscle::from(record.id, record.name, record.position, record.size)?;
+            Ok(Some(muscle))
+        } else {
+            return Err(MyError::BadRequest(json!({
+                "error": format!("no record of id={}.", id)
+            })));
+        }
     }
 
     async fn fetch_by_train_id(&self, train_id: &String) -> Result<Vec<Muscle>, MyError> {
@@ -82,15 +89,17 @@ pub struct BodyPartRepositoryImpl<'a> {
 impl BodyPartRepository for BodyPartRepositoryImpl<'_> {
     async fn save(&self, id: String, body_part: BodyPosition) -> Result<(), MyError> {
         println!("bodypart create");
+        let mut tx = self.conn.begin().await?;
         sqlx::query!(
-            "insert into body_parts
+            r#"insert into body_parts(id,name)
             values(?,?)
-            ",
+            "#,
             id,
             body_part.to_string()
         )
-        .execute(self.conn)
+        .execute(&mut tx)
         .await?;
+        tx.commit().await?;
         Ok(())
     }
 

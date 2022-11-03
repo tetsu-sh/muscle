@@ -1,8 +1,6 @@
-use std::str::FromStr;
-
 use crate::{
     domain::{
-        muscle::{BodyPosition, Muscle, MuscleSize},
+        muscle::Muscle,
         train::{Train, TrainRepository},
     },
     utils::errors::MyError,
@@ -57,13 +55,12 @@ impl FetchTrainRdbQueryModel {
             )?)
         }
         let initial_item = items[0].clone();
-        let train = Train::new(
+        Train::new(
             initial_item.train_name,
             initial_item.volume,
             initial_item.rep,
             muscles,
-        );
-        train
+        )
     }
 }
 
@@ -92,16 +89,6 @@ impl TrainRepository for TrainRepositoryImpl<'_> {
     }
 
     async fn fetch_one(&self, id: &String) -> Result<Train, MyError> {
-        // let query_trains = sqlx::query_as::<_, FetchTrainRdbQueryModel>(
-        //     "select * from trains as t
-        //     join train_muscle as tm on trains.id=trains_muscles.train_id
-        //     join muscles as m on tm.muscle_id=m.id
-        //     join body_parts as bp on m.body_part_id=bp.id
-        //     where t.id=?",
-        // )
-        // .bind(id)
-        // .fetch_all(self.conn)
-        // .await?;
         let query_trains = sqlx::query!(
             "select t.id,t.name,t.volume,t.rep,m.id as train_id,m.name as muscle_name,m.size,bp.name as body_part_name
             from trains as t 
@@ -116,8 +103,7 @@ impl TrainRepository for TrainRepositoryImpl<'_> {
         .iter()
         .map(|x|FetchTrainRdbQueryModel::new(x.id.clone(), x.name.clone(), x.volume, x.rep, x.muscle_name.clone(), x.size.clone(), x.body_part_name.clone())).collect::<Vec<FetchTrainRdbQueryModel>>();
 
-        let train = FetchTrainRdbQueryModel::to_domain(query_trains);
-        train
+        FetchTrainRdbQueryModel::to_domain(query_trains)
     }
 
     fn find_by_name(&self) {

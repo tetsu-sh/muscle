@@ -18,6 +18,7 @@ impl<M: MuscleRepository, P: BodyPartRepository> MuscleUsecase<M, P> {
             body_part_repository,
         }
     }
+
     pub async fn create_muscle(
         &self,
         name: String,
@@ -30,9 +31,12 @@ impl<M: MuscleRepository, P: BodyPartRepository> MuscleUsecase<M, P> {
         self.muscle_repository.create(&muscle, body_part_id);
         Ok(muscle)
     }
-    pub fn fetch_muscle(&self, id: &String) -> Result<Muscle, MyError> {
-        self.fetch_muscle(id)
+
+    pub async fn fetch_muscle(&self, id: &String) -> Result<Muscle, MyError> {
+        let muscle = self.muscle_repository.fetch_one(id).await?;
+        Ok(muscle.unwrap())
     }
+
     pub async fn create_body_part(&self, name: String) -> Result<BodyPosition, MyError> {
         let body_part_record = self.body_part_repository.find_by_name(&name).await?;
         println!("{:?}", body_part_record);

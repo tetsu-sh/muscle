@@ -113,7 +113,7 @@ pub async fn fetch_muscle(
         body_part_repository,
     };
 
-    let muscle = muscle_usecase.fetch_muscle(&params.id)?;
+    let muscle = muscle_usecase.fetch_muscle(&params.id).await?;
     let fetch_muscle_response = FetchMuscleResponse::from(muscle);
 
     Ok(HttpResponse::Ok().json(fetch_muscle_response))

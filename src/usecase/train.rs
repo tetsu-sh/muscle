@@ -28,7 +28,7 @@ impl<T: TrainRepository, M: MuscleRepository> TrainUsecase<T, M> {
     ) -> Result<Train, MyError> {
         let mut muscles = vec![];
         for muscle_id in muscle_ids {
-            muscles.push(self.muscle_repository.fetch_one(&muscle_id).await?);
+            muscles.push(self.muscle_repository.fetch_one(&muscle_id).await?.unwrap());
         }
         let train = Train::new(name, volume, rep, muscles)?;
         self.train_repository.create(&train);
