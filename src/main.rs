@@ -50,16 +50,17 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
-    let pool = utils::db::establish_connection();
-
-    let state = crate::utils::state::AppState { pool };
+    // let pool = utils::db::establish_connection();
+    let pool = utils::db::establish_sqlx_connection().await;
+    let app_state = utils::state::AppState { sqlx_db: pool };
+    // let state = crate::utils::state::AppState { pool };
 
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
             .configure(api)
             .app_data(Data::new(schema.clone()))
-            .app_data(Data::new(state.clone()))
+            .app_data(Data::new(app_state.clone()))
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
             .service(web::resource("/").guard(guard::Post()).to(index))
     })
@@ -74,8 +75,22 @@ pub fn api(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .service(
                 web::scope("/train")
-                .service(web::scope("").route("", get().to(presentation::train::fetch)))
-                .service(web::scope("").route("", post().to(presentation::train::create)))
+                    .route("", get().to(presentation::train::fetch))
+                    .route("", post().to(presentation::train::create)),
+            )
+            .service(
+                web::scope("/account")
+                    .route("", get().to(presentation::account::fetch_account))
+                    .route("", post().to(presentation::account::create_account)),
+            )
+            .service(
+                web::scope("/muscle")
+                    .route("", get().to(presentation::muscle::fetch_muscle))
+                    .route("", post().to(presentation::muscle::create_muscle))
+                    .service(
+                        web::scope("/body_part")
+                            .route("", post().to(presentation::muscle::create_body_part)),
+                    ),
             )
             .service(
                 web::scope("/healthcheck").route("", get().to(presentation::healthcheck::index)),

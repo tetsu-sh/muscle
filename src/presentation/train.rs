@@ -1,22 +1,24 @@
-use actix_web::{web, HttpRequest, Responder};
+use actix_web::{web, HttpRequest};
 
-use crate::repository::model;
+use crate::domain::muscle::Muscle;
+use crate::domain::train::Train;
+use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::repository::train_repository::TrainRepositoryImpl;
 use crate::usecase::train::TrainUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
-use crate::{domain::train::Train, utils::db::DbPool};
 use actix_web::HttpResponse;
 use log::info;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
-#[derive(Deserialize, Serialize,Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct CreateTrainRequest {
     name: String,
     volume: i32,
     rep: i32,
     set: i32,
+    muscle_ids: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -30,7 +32,7 @@ impl From<Train> for CreateTrainResponse {
     }
 }
 
-#[derive(Deserialize, Serialize,Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct FetchTrainParameter {
     id: String,
 }
@@ -41,7 +43,7 @@ pub struct FetchTrainResponse {
     name: String,
     volume: i32,
     rep: i32,
-    set: i32,
+    muscles: Vec<Muscle>,
 }
 
 impl FetchTrainResponse {
@@ -51,7 +53,7 @@ impl FetchTrainResponse {
             name: train.name,
             volume: train.volume,
             rep: train.rep,
-            set: train.set,
+            muscles: train.muscles,
         }
     }
 }
@@ -64,12 +66,23 @@ pub async fn create(
     form: web::Json<CreateTrainRequest>,
 ) -> ApiResponse {
     info!("start create");
-    println!("{:?}",form);
-    println!("{:?}",req);
-    let conn = state.get_conn()?;
+    println!("{:?}", form);
+    println!("{:?}", req);
+    let conn = state.get_sqls_db_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
-    let train_usecase = TrainUsecase { train_repository };
-    let train = train_usecase.create_train(form.name.clone(), form.volume, form.rep, form.set)?;
+    let muscle_repository = MuscleRepositoryImpl { conn: &conn };
+    let train_usecase = TrainUsecase {
+        train_repository,
+        muscle_repository,
+    };
+    let train = train_usecase
+        .create_train(
+            form.name.clone(),
+            form.volume,
+            form.rep,
+            form.muscle_ids.clone(),
+        )
+        .await?;
     let create_train_response = CreateTrainResponse::from(train);
     Ok(HttpResponse::Ok().json(create_train_response))
 }
@@ -79,12 +92,16 @@ pub async fn fetch(
     req: HttpRequest,
     params: web::Query<FetchTrainParameter>,
 ) -> ApiResponse {
-    println!("{:?}",params);
-    println!("{:?}",req);
-    let conn = state.get_conn()?;
+    println!("{:?}", params);
+    println!("{:?}", req);
+    let conn = state.get_sqls_db_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
-    let train_usecase = TrainUsecase { train_repository };
-    let train = train_usecase.fetch_one(&params.id)?;
+    let muscle_repository = MuscleRepositoryImpl { conn: &conn };
+    let train_usecase = TrainUsecase {
+        train_repository,
+        muscle_repository,
+    };
+    let train = train_usecase.fetch_one(&params.id).await?;
     let res = FetchTrainResponse::from(train);
 
     Ok(HttpResponse::Ok().json(res))
