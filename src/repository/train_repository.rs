@@ -66,18 +66,22 @@ impl FetchTrainRdbQueryModel {
 
 #[async_trait]
 impl TrainRepository for TrainRepositoryImpl<'_> {
-    async fn create(&self, train: &Train) -> Result<(), MyError> {
+    async fn create(&self, train: &Train, account_id: &String) -> Result<(), MyError> {
         // store train model and connect train and muscles.
         // TODO transaction,bulk insert.
         for muscle in train.muscles.iter() {
-            sqlx::query!("insert into train_muscle values(?,?)", train.id, muscle.id)
-                .execute(self.conn)
-                .await?;
+            sqlx::query!(
+                "insert into train_muscle(train_id,muscle_id) values(?,?)",
+                train.id,
+                muscle.id
+            )
+            .execute(self.conn)
+            .await?;
         }
         sqlx::query!(
-            "insert into trains values(?,?,?,?,?)",
+            "insert into trains(id,account_id,name,volume,rep) values(?,?,?,?,?)",
             train.id,
-            "test_account_id",
+            account_id,
             train.name,
             train.volume,
             train.rep

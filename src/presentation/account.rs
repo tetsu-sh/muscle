@@ -1,14 +1,10 @@
 use actix_web::{web, HttpRequest};
 
 use crate::domain::account::Account;
-use crate::domain::muscle::BodyPosition;
 use crate::repository::account_repository::AccountRepositoryImpl;
-use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::usecase::account::AccountUsecase;
-use crate::usecase::muscle::MuscleUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
-use crate::{domain::muscle::Muscle, repository::muscle_repository::BodyPartRepositoryImpl};
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
