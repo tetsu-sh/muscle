@@ -49,7 +49,7 @@ impl Train {
 }
 #[async_trait]
 pub trait TrainRepository {
-    async fn create(&self, train: &Train) -> Result<(), MyError>;
+    async fn create(&self, train: &Train, account_id: &String) -> Result<(), MyError>;
     async fn fetch_one(&self, id: &String) -> Result<Train, MyError>;
     fn find_by_name(&self);
 }

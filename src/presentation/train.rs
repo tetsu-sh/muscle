@@ -1,12 +1,13 @@
 use actix_web::{web, HttpRequest};
 
-use crate::domain::muscle::Muscle;
 use crate::domain::train::Train;
 use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::repository::train_repository::TrainRepositoryImpl;
+use crate::usecase::account::AccountUsecase;
 use crate::usecase::train::TrainUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
+use crate::{domain::muscle::Muscle, middleware};
 use actix_web::HttpResponse;
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,6 @@ pub struct CreateTrainRequest {
     name: String,
     volume: i32,
     rep: i32,
-    set: i32,
     muscle_ids: Vec<String>,
 }
 
@@ -68,7 +68,11 @@ pub async fn create(
     info!("start create");
     println!("{:?}", form);
     println!("{:?}", req);
+
     let conn = state.get_sqls_db_conn()?;
+    let account_id = middleware::authn::get_account_id_from_header(&req).unwrap();
+    println!("{}", account_id);
+
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
     let train_usecase = TrainUsecase {
@@ -77,6 +81,7 @@ pub async fn create(
     };
     let train = train_usecase
         .create_train(
+            &account_id.to_string(),
             form.name.clone(),
             form.volume,
             form.rep,
