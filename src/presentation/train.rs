@@ -3,13 +3,11 @@ use actix_web::{web, HttpRequest};
 use crate::domain::train::Train;
 use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::repository::train_repository::TrainRepositoryImpl;
-use crate::usecase::account::AccountUsecase;
 use crate::usecase::train::TrainUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
 use crate::{domain::muscle::Muscle, middleware};
 use actix_web::HttpResponse;
-use log::info;
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
@@ -60,18 +58,13 @@ impl FetchTrainResponse {
 
 pub type ApiResponse = Result<HttpResponse, MyError>;
 
-pub async fn create(
+pub async fn create_train(
     state: web::Data<AppState>,
     req: HttpRequest,
     form: web::Json<CreateTrainRequest>,
 ) -> ApiResponse {
-    info!("start create");
-    println!("{:?}", form);
-    println!("{:?}", req);
-
     let conn = state.get_sqls_db_conn()?;
     let account_id = middleware::authn::get_account_id_from_header(&req).unwrap();
-    println!("{}", account_id);
 
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
@@ -92,13 +85,11 @@ pub async fn create(
     Ok(HttpResponse::Ok().json(create_train_response))
 }
 
-pub async fn fetch(
+pub async fn fetch_train(
     state: web::Data<AppState>,
     req: HttpRequest,
     params: web::Query<FetchTrainParameter>,
 ) -> ApiResponse {
-    println!("{:?}", params);
-    println!("{:?}", req);
     let conn = state.get_sqls_db_conn()?;
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };

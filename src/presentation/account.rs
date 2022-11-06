@@ -56,8 +56,6 @@ pub async fn create_account(
     req: HttpRequest,
     form: web::Json<CreateAccountRequest>,
 ) -> ApiResponse {
-    println!("{:?}", form);
-    println!("{:?}", req);
     let conn = state.get_sqls_db_conn()?;
     let account_repository = AccountRepositoryImpl { conn: &conn };
     let account_usecase = AccountUsecase { account_repository };
@@ -72,8 +70,6 @@ pub async fn fetch_account(
     req: HttpRequest,
     params: web::Query<FetchAccountParameter>,
 ) -> ApiResponse {
-    println!("{:?}", params);
-    println!("{:?}", req);
     let conn = state.get_sqls_db_conn()?;
     let account_repository = AccountRepositoryImpl { conn: &conn };
     let account_usecase = AccountUsecase { account_repository };

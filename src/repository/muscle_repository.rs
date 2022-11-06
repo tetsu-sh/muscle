@@ -26,7 +26,7 @@ struct MusclesQueryModel {
 
 #[async_trait]
 impl MuscleRepository for MuscleRepositoryImpl<'_> {
-    async fn create(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError> {
+    async fn save(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError> {
         sqlx::query!(
             "insert into muscles
             values(?,?,?,?)

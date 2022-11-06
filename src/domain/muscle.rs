@@ -44,8 +44,11 @@ impl Muscle {
 
 #[async_trait]
 pub trait MuscleRepository {
-    async fn create(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError>;
+    /// store Muscle to DB.
+    async fn save(&self, muscle: &Muscle, body_part_id: String) -> Result<(), MyError>;
+    /// find one muscle from DB by primary key. return Muscle. if not exist,None.
     async fn fetch_one(&self, id: &String) -> Result<Option<Muscle>, MyError>;
+    /// find some muscles relating to train_id requested.
     async fn fetch_by_train_id(&self, train_id: &String) -> Result<Vec<Muscle>, MyError>;
     fn find_by_name(&self, name: &String);
 }

@@ -4,12 +4,12 @@ use async_trait::async_trait;
 use serde_json::json;
 use ulid::Ulid;
 
-// represent training detail and strength.
+/// represent training detail and strength.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Train {
     pub name: String,
     pub id: String,
-    // means weight
+    // means weight of weight
     pub volume: i32,
     // times
     pub rep: i32,
@@ -21,15 +21,16 @@ const REP_LIMIT: i32 = 1000;
 const VOLUME_LIMIT: i32 = 1000;
 
 impl Train {
+    /// create new Train Object with new id.
     pub fn new(name: String, volume: i32, rep: i32, muscles: Vec<Muscle>) -> Result<Self, MyError> {
         if volume > VOLUME_LIMIT {
             return Err(MyError::BadRequest(
-                json!({"error":"volume must be less than 1000.you are possibly not human."}),
+                json!({"error":"volume must be less than 1000. you are possibly not human."}),
             ));
         };
         if rep > REP_LIMIT {
             return Err(MyError::BadRequest(
-                json!({"error":"rep must be less than 1000.you are possibly not human."}),
+                json!({"error":"rep must be less than 1000. you are possibly not human."}),
             ));
         };
         if name.chars().count() as i32 > NAME_LIMIT {
@@ -49,7 +50,9 @@ impl Train {
 }
 #[async_trait]
 pub trait TrainRepository {
-    async fn create(&self, train: &Train, account_id: &String) -> Result<(), MyError>;
+    /// store Train to DB.
+    async fn save(&self, train: &Train, account_id: &String) -> Result<(), MyError>;
+    /// find one Train from DB by primary key. return Train. if not exist,None.
     async fn fetch_one(&self, id: &String) -> Result<Train, MyError>;
     fn find_by_name(&self);
 }

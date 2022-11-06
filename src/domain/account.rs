@@ -22,7 +22,9 @@ impl Account {
 
 #[async_trait]
 pub trait AccountRepository {
+    /// store Account to DB.
     async fn save(&self, account: &Account) -> Result<(), MyError>;
+    /// find one Account from DB by primary key. return Account. if not exist,None.
     async fn fetch_one(&self, id: &String) -> Result<Option<Account>, MyError>;
     fn find_by_name(&self, name: &String);
 }

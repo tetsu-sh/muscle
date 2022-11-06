@@ -66,7 +66,7 @@ impl FetchTrainRdbQueryModel {
 
 #[async_trait]
 impl TrainRepository for TrainRepositoryImpl<'_> {
-    async fn create(&self, train: &Train, account_id: &String) -> Result<(), MyError> {
+    async fn save(&self, train: &Train, account_id: &String) -> Result<(), MyError> {
         // store train model and connect train and muscles.
         // TODO transaction,bulk insert.
         for muscle in train.muscles.iter() {

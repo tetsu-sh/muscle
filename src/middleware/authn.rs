@@ -10,6 +10,7 @@ pub fn get_current_user(req: &HttpRequest) -> Result<Account, MyError> {
         .ok_or_else(|| MyError::BadRequest(json!({ "error": "authorized error" })))
 }
 
+/// return account_id extracting from request header.
 pub fn get_account_id_from_header(req: &HttpRequest) -> Result<&str, &str> {
     // call from presentation layer
     // TODO want set Request intercepter as like middleware.
