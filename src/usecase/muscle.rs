@@ -28,7 +28,7 @@ impl<M: MuscleRepository, P: BodyPartRepository> MuscleUsecase<M, P> {
         let body_position = self.body_part_repository.fetch_one(&body_part_id).await?;
         let size = MuscleSize::from_str(&size)?;
         let muscle = Muscle::new(name, body_position, size);
-        self.muscle_repository.create(&muscle, body_part_id);
+        self.muscle_repository.save(&muscle, body_part_id);
         Ok(muscle)
     }
 
@@ -38,8 +38,8 @@ impl<M: MuscleRepository, P: BodyPartRepository> MuscleUsecase<M, P> {
     }
 
     pub async fn create_body_part(&self, name: String) -> Result<(BodyPosition, String), MyError> {
+        // check body part requested exists.
         let body_part_record = self.body_part_repository.find_by_name(&name).await?;
-        println!("{:?}", body_part_record);
         if body_part_record.is_some() {
             return Err(MyError::BadRequest(json!({
                 "error":"same name are not forbidden."

@@ -12,7 +12,7 @@ mod utils;
 
 use actix_web::middleware::Logger;
 use actix_web::web::{get, post, Data};
-use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
+use actix_web::{web, App, HttpServer};
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -40,8 +40,8 @@ pub fn api(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .service(
                 web::scope("/train")
-                    .route("", get().to(presentation::train::fetch))
-                    .route("", post().to(presentation::train::create)),
+                    .route("", get().to(presentation::train::fetch_train))
+                    .route("", post().to(presentation::train::create_train)),
             )
             .service(
                 web::scope("/account")

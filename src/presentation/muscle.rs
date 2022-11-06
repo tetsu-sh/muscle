@@ -79,8 +79,7 @@ pub async fn create_muscle(
     req: HttpRequest,
     form: web::Json<CreateMuscleRequest>,
 ) -> ApiResponse {
-    println!("{:?}", form);
-    println!("{:?}", req);
+    // object setting.
     let conn = state.get_sqls_db_conn()?;
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
     let body_part_repository = BodyPartRepositoryImpl { conn: &conn };
@@ -105,8 +104,7 @@ pub async fn fetch_muscle(
     req: HttpRequest,
     params: web::Query<FetchMuscleParameter>,
 ) -> ApiResponse {
-    println!("{:?}", params);
-    println!("{:?}", req);
+    // object setting.
     let conn = state.get_sqls_db_conn()?;
     let body_part_repository = BodyPartRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
@@ -117,7 +115,6 @@ pub async fn fetch_muscle(
 
     let muscle = muscle_usecase.fetch_muscle(&params.id).await?;
     let fetch_muscle_response = FetchMuscleResponse::from(muscle);
-
     Ok(HttpResponse::Ok().json(fetch_muscle_response))
 }
 
@@ -126,8 +123,7 @@ pub async fn create_body_part(
     req: HttpRequest,
     params: web::Json<CreateBodyPartParameter>,
 ) -> ApiResponse {
-    println!("{:?}", params);
-    println!("{:?}", req);
+    // object setting.
     let conn = state.get_sqls_db_conn()?;
     let body_part_repository = BodyPartRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
@@ -135,6 +131,7 @@ pub async fn create_body_part(
         muscle_repository,
         body_part_repository,
     };
+
     let (body_part, id) = muscle_usecase.create_body_part(params.name.clone()).await?;
     let create_body_part_response = CreateBodyPartResponse::from(id, body_part);
     Ok(HttpResponse::Ok().json(create_body_part_response))
