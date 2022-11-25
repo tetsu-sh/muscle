@@ -64,7 +64,7 @@ pub async fn create_train(
     form: web::Json<CreateTrainRequest>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
-    let account_id = middleware::authn::get_account_id_from_header(&req).unwrap();
+    let user_id = middleware::authn::get_user_id_from_header(&req)?;
 
     let train_repository = TrainRepositoryImpl { conn: &conn };
     let muscle_repository = MuscleRepositoryImpl { conn: &conn };
@@ -74,7 +74,7 @@ pub async fn create_train(
     };
     let train = train_usecase
         .create_train(
-            &account_id.to_string(),
+            &user_id.to_string(),
             form.name.clone(),
             form.volume,
             form.rep,

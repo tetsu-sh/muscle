@@ -7,4 +7,4 @@ drop table muscle_damages;
 drop table muscles;
 drop table body_conditions;
 drop table body_parts;
-drop table accounts;
+drop table users;

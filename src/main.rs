@@ -1,12 +1,8 @@
-#[macro_use]
-extern crate diesel;
-
 mod constants;
 mod domain;
 mod middleware;
 mod presentation;
 mod repository;
-mod schema;
 mod usecase;
 mod utils;
 
@@ -44,9 +40,9 @@ pub fn api(cfg: &mut web::ServiceConfig) {
                     .route("", post().to(presentation::train::create_train)),
             )
             .service(
-                web::scope("/account")
-                    .route("", get().to(presentation::account::fetch_account))
-                    .route("", post().to(presentation::account::create_account)),
+                web::scope("/user")
+                    .route("login", post().to(presentation::user::sign_in))
+                    .route("", post().to(presentation::user::sign_up)),
             )
             .service(
                 web::scope("/muscle")

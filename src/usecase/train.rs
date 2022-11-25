@@ -22,7 +22,7 @@ impl<T: TrainRepository, M: MuscleRepository> TrainUsecase<T, M> {
     /// create new train. connect train with muscle specified by client.
     pub async fn create_train(
         &self,
-        account_id: &String,
+        user_id: &String,
         name: String,
         volume: i32,
         rep: i32,
@@ -33,7 +33,7 @@ impl<T: TrainRepository, M: MuscleRepository> TrainUsecase<T, M> {
             muscles.push(self.muscle_repository.fetch_one(&muscle_id).await?.unwrap());
         }
         let train = Train::new(name, volume, rep, muscles)?;
-        self.train_repository.save(&train, account_id);
+        self.train_repository.save(&train, user_id);
         Ok(train)
     }
 

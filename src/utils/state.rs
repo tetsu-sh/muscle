@@ -1,7 +1,5 @@
 use crate::utils;
 use crate::utils::errors::MyError;
-use diesel::mysql::MysqlConnection;
-use diesel::r2d2::{ConnectionManager, PooledConnection};
 use sqlx::MySqlPool;
 
 /// to transfer state to actix web
