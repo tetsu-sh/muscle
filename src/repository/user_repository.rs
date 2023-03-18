@@ -52,7 +52,7 @@ impl UserRepository for UserRepositoryImpl<'_> {
         .fetch_optional(self.conn)
         .await?;
         if let Some(record) = record {
-            let user = User::from(record.id, record.name)?;
+            let user = User::from(record.id, record.code, record.name, record.password)?;
             Ok(Some(user))
         } else {
             return Err(MyError::BadRequest(json!({

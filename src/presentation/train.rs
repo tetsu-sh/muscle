@@ -3,6 +3,7 @@ use actix_web::{web, HttpRequest};
 use crate::domain::train::Train;
 use crate::repository::muscle_repository::MuscleRepositoryImpl;
 use crate::repository::train_repository::TrainRepositoryImpl;
+use crate::repository::user_repository::UserRepositoryImpl;
 use crate::usecase::train::TrainUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
@@ -64,17 +65,18 @@ pub async fn create_train(
     form: web::Json<CreateTrainRequest>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
-    let account_id = middleware::authn::get_account_id_from_header(&req).unwrap();
+    let user_id = middleware::authn::get_user_id_from_header(&req).unwrap();
 
-    let train_repository = TrainRepositoryImpl { conn: &conn };
-    let muscle_repository = MuscleRepositoryImpl { conn: &conn };
+    let train_repository = Box::new(TrainRepositoryImpl { conn: &conn });
+    let muscle_repository = Box::new(MuscleRepositoryImpl { conn: &conn });
+
     let train_usecase = TrainUsecase {
         train_repository,
         muscle_repository,
     };
     let train = train_usecase
         .create_train(
-            &account_id.to_string(),
+            &user_id.to_string(),
             form.name.clone(),
             form.volume,
             form.rep,
@@ -91,8 +93,8 @@ pub async fn fetch_train(
     params: web::Query<FetchTrainParameter>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
-    let train_repository = TrainRepositoryImpl { conn: &conn };
-    let muscle_repository = MuscleRepositoryImpl { conn: &conn };
+    let train_repository = Box::new(TrainRepositoryImpl { conn: &conn });
+    let muscle_repository = Box::new(MuscleRepositoryImpl { conn: &conn });
     let train_usecase = TrainUsecase {
         train_repository,
         muscle_repository,

@@ -6,13 +6,16 @@ use crate::{
     utils::errors::MyError,
 };
 
-pub struct TrainUsecase<T: TrainRepository, M: MuscleRepository> {
-    pub train_repository: T,
-    pub muscle_repository: M,
+pub struct TrainUsecase {
+    pub train_repository: Box<dyn TrainRepository>,
+    pub muscle_repository: Box<dyn MuscleRepository>,
 }
 
-impl<T: TrainRepository, M: MuscleRepository> TrainUsecase<T, M> {
-    pub fn new(train_repository: T, muscle_repository: M) -> Self {
+impl TrainUsecase {
+    pub fn new(
+        train_repository: Box<dyn TrainRepository>,
+        muscle_repository: Box<dyn MuscleRepository>,
+    ) -> Self {
         Self {
             train_repository,
             muscle_repository,

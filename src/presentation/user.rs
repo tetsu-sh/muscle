@@ -12,72 +12,73 @@ use std::convert::From;
 pub type ApiResponse = Result<HttpResponse, MyError>;
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct CreateUserRequest {
+pub struct SignUpRequest {
     name: String,
+    code: Option<String>,
+    raw_password: String,
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct CreateUserResponse {
-    id: String,
-    name: String,
+pub struct SignUpResponse {
+    code: String,
 }
 
-impl From<User> for CreateUserResponse {
-    fn from(account: User) -> Self {
-        Self {
-            id: account.id,
-            name: account.name,
-        }
+impl SignUpResponse {
+    fn from(code: String) -> Self {
+        Self { code }
     }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct FetchUserParameter {
-    id: String,
+pub struct SignInParameter {
+    code: String,
+    raw_password: String,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct FetchUserResponse {
-    id: String,
-    name: String,
+    token: String,
 }
 
 impl FetchUserResponse {
-    fn from(account: User) -> Self {
-        Self {
-            id: account.id,
-            name: account.name,
-        }
+    fn from(token: String) -> Self {
+        Self { token }
     }
 }
 
-pub async fn create_user(
+pub async fn sign_up(
     state: web::Data<AppState>,
     req: HttpRequest,
-    form: web::Json<CreateUserRequest>,
+    form: web::Json<SignUpRequest>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
-    let account_repository = UserRepositoryImpl { conn: &conn };
-    let user_usecase = UserUsecase {
-        user_repository: account_repository,
-    };
+    let user_repository = UserRepositoryImpl { conn: &conn };
+    let user_usecase = UserUsecase { user_repository };
 
-    let user = user_usecase.user_account(form.name.clone()).await?;
-    let create_muscle_response = CreateUserResponse::from(user);
+    let (user, token) = user_usecase
+        .sign_up(
+            form.name.clone(),
+            form.code.clone(),
+            form.raw_password.clone(),
+        )
+        .await?;
+    let create_muscle_response = SignUpResponse::from(user.code);
     Ok(HttpResponse::Ok().json(create_muscle_response))
 }
 
 pub async fn fetch_user(
     state: web::Data<AppState>,
     req: HttpRequest,
-    params: web::Query<FetchUserParameter>,
+    params: web::Query<SignInParameter>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
     let user_repository = UserRepositoryImpl { conn: &conn };
     let user_usecase = UserUsecase { user_repository };
 
-    let user = user_usecase.fetch(&params.id).await?;
-    let fetch_user_response = FetchUserResponse::from(user);
+    let token = user_usecase
+        .sign_in(params.code.clone(), params.raw_password.clone())
+        .await?;
+    let fetch_user_response = FetchUserResponse::from(token);
 
     Ok(HttpResponse::Ok().json(fetch_user_response))
 }
