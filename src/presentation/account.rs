@@ -1,8 +1,8 @@
 use actix_web::{web, HttpRequest};
 
-use crate::domain::account::Account;
-use crate::repository::account_repository::AccountRepositoryImpl;
-use crate::usecase::account::AccountUsecase;
+use crate::domain::user::User;
+use crate::repository::user_repository::UserRepositoryImpl;
+use crate::usecase::user::UserUsecase;
 use crate::utils::errors::MyError;
 use crate::utils::state::AppState;
 use actix_web::HttpResponse;
@@ -12,18 +12,18 @@ use std::convert::From;
 pub type ApiResponse = Result<HttpResponse, MyError>;
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct CreateAccountRequest {
+pub struct CreateUserRequest {
     name: String,
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct CreateAccountResponse {
+pub struct CreateUserResponse {
     id: String,
     name: String,
 }
 
-impl From<Account> for CreateAccountResponse {
-    fn from(account: Account) -> Self {
+impl From<User> for CreateUserResponse {
+    fn from(account: User) -> Self {
         Self {
             id: account.id,
             name: account.name,
@@ -32,18 +32,18 @@ impl From<Account> for CreateAccountResponse {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct FetchAccountParameter {
+pub struct FetchUserParameter {
     id: String,
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct FetchAccountResponse {
+pub struct FetchUserResponse {
     id: String,
     name: String,
 }
 
-impl FetchAccountResponse {
-    fn from(account: Account) -> Self {
+impl FetchUserResponse {
+    fn from(account: User) -> Self {
         Self {
             id: account.id,
             name: account.name,
@@ -51,31 +51,33 @@ impl FetchAccountResponse {
     }
 }
 
-pub async fn create_account(
+pub async fn create_user(
     state: web::Data<AppState>,
     req: HttpRequest,
-    form: web::Json<CreateAccountRequest>,
+    form: web::Json<CreateUserRequest>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
-    let account_repository = AccountRepositoryImpl { conn: &conn };
-    let account_usecase = AccountUsecase { account_repository };
+    let account_repository = UserRepositoryImpl { conn: &conn };
+    let user_usecase = UserUsecase {
+        user_repository: account_repository,
+    };
 
-    let account = account_usecase.create_account(form.name.clone()).await?;
-    let create_muscle_response = CreateAccountResponse::from(account);
+    let user = user_usecase.user_account(form.name.clone()).await?;
+    let create_muscle_response = CreateUserResponse::from(user);
     Ok(HttpResponse::Ok().json(create_muscle_response))
 }
 
-pub async fn fetch_account(
+pub async fn fetch_user(
     state: web::Data<AppState>,
     req: HttpRequest,
-    params: web::Query<FetchAccountParameter>,
+    params: web::Query<FetchUserParameter>,
 ) -> ApiResponse {
     let conn = state.get_sqls_db_conn()?;
-    let account_repository = AccountRepositoryImpl { conn: &conn };
-    let account_usecase = AccountUsecase { account_repository };
+    let user_repository = UserRepositoryImpl { conn: &conn };
+    let user_usecase = UserUsecase { user_repository };
 
-    let account = account_usecase.fetch(&params.id).await?;
-    let fetch_account_response = FetchAccountResponse::from(account);
+    let user = user_usecase.fetch(&params.id).await?;
+    let fetch_user_response = FetchUserResponse::from(user);
 
-    Ok(HttpResponse::Ok().json(fetch_account_response))
+    Ok(HttpResponse::Ok().json(fetch_user_response))
 }

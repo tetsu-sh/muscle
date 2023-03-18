@@ -45,8 +45,8 @@ pub fn api(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::scope("/account")
-                    .route("", get().to(presentation::account::fetch_account))
-                    .route("", post().to(presentation::account::create_account)),
+                    .route("", get().to(presentation::account::fetch_user))
+                    .route("", post().to(presentation::account::create_user)),
             )
             .service(
                 web::scope("/muscle")

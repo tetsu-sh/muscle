@@ -1,8 +1,10 @@
 -- Your SQL goes here
 
-CREATE TABLE accounts(
+CREATE TABLE users(
     id VARCHAR(100) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(100) NOT NULL UNIQUE,
+    password TEXT NOT NULL
 );
 
 CREATE TABLE trains (

@@ -1,6 +1,8 @@
 use actix_web::error::ContentTypeError;
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
+use bcrypt::BcryptError;
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
+use jsonwebtoken::errors::{Error as JwtError, ErrorKind as JwtErrorKind};
 use r2d2::Error as R2D2Error;
 use serde_json::json;
 use serde_json::Value as JsonValue;
@@ -18,6 +20,8 @@ pub enum MyError {
     BadRequest(JsonValue),
     #[error("Unprocessable Entity")]
     UnprocessableEntity(JsonValue),
+    #[error("Unauthorized")]
+    Unauthorized(JsonValue),
 }
 
 impl ResponseError for MyError {
@@ -29,6 +33,7 @@ impl ResponseError for MyError {
             MyError::UnprocessableEntity(ref msg) => HttpResponse::UnprocessableEntity().json(msg),
             MyError::NotFound(ref msg) => HttpResponse::NotFound().json(msg),
             MyError::BadRequest(ref msg) => HttpResponse::BadRequest().json(msg),
+            MyError::Unauthorized(ref msg) => HttpResponse::Unauthorized().json(msg),
         }
     }
 
@@ -38,6 +43,7 @@ impl ResponseError for MyError {
             MyError::NotFound(_) => StatusCode::NOT_FOUND,
             MyError::BadRequest(_) => StatusCode::BAD_REQUEST,
             MyError::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            MyError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
         }
     }
 }
@@ -88,5 +94,32 @@ impl From<StrumParseError> for MyError {
 impl From<R2D2Error> for MyError {
     fn from(err: R2D2Error) -> Self {
         MyError::InternalServerError
+    }
+}
+
+impl From<JwtError> for MyError {
+    fn from(err: JwtError) -> Self {
+        match err.kind() {
+            JwtErrorKind::InvalidToken => {
+                MyError::Unauthorized(json!({"error":"Token is invalid"}))
+            }
+            JwtErrorKind::InvalidIssuer => {
+                MyError::Unauthorized(json!({"error":"Issur is invalid"}))
+            }
+            JwtErrorKind::ExpiredSignature => {
+                MyError::Unauthorized(json!({"error":"Token has expired please reflesh by login"}))
+            }
+            _ => MyError::Unauthorized(json!({
+                "error": format!("problem except token and issue {}", err.to_string())
+            })),
+        }
+    }
+}
+
+impl From<BcryptError> for MyError {
+    fn from(err: BcryptError) -> Self {
+        MyError::Unauthorized(json!({
+            "error": err.to_string()
+        }))
     }
 }
